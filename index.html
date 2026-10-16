@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payroll — Система расчёта заработной платы</title>
+<link rel="stylesheet" href="style.css">
+<base target="_blank">
+</head>
+<body>
+
+<header class="header">
+  <div class="container header__inner">
+    <div class="logo">
+      <span class="logo__mark">₽</span>
+      <div>
+        <h1>Payroll</h1>
+        <p>Система расчёта заработной платы</p>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tabs__btn active" data-tab="employees">Сотрудники</button>
+      <button class="tabs__btn" data-tab="payroll">Начисления</button>
+      <button class="tabs__btn" data-tab="statements">Ведомости</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- ============ СОТРУДНИКИ ============ -->
+  <section id="tab-employees" class="tab active">
+    <div class="panel">
+      <h2 class="panel__title">Карточка сотрудника</h2>
+      <form id="employee-form" class="form">
+        <input type="hidden" id="emp-id">
+        <div class="form__grid">
+          <label>ФИО
+            <input type="text" id="emp-name" placeholder="Иванов Иван Иванович" required>
+          </label>
+          <label>Должность
+            <input type="text" id="emp-position" placeholder="Менеджер" required>
+          </label>
+          <label>Тип оплаты
+            <select id="emp-type">
+              <option value="salary">Оклад (в месяц)</option>
+              <option value="hourly">Часовая ставка</option>
+            </select>
+          </label>
+          <label>Размер ставки, ₽
+            <input type="number" id="emp-rate" min="0" step="0.01" placeholder="80000" required>
+          </label>
+          <label>Налог (НДФЛ), %
+            <input type="number" id="emp-tax" min="0" max="50" step="0.1" value="13">
+          </label>
+        </div>
+        <div class="form__actions">
+          <button type="submit" class="btn btn--primary" id="emp-submit">Добавить сотрудника</button>
+          <button type="button" class="btn btn--ghost" id="emp-cancel" hidden>Отмена</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel__title">Штатное расписание <span class="badge" id="emp-count">0</span></h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ФИО</th><th>Должность</th><th>Тип оплаты</th>
+              <th>Ставка, ₽</th><th>Налог, %</th><th class="th-actions">Действия</th>
+            </tr>
+          </thead>
+          <tbody id="employees-tbody"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="employees-empty">Сотрудников пока нет — добавьте первого через форму выше.</p>
+    </div>
+  </section>
+
+  <!-- ============ НАЧИСЛЕНИЯ ============ -->
+  <section id="tab-payroll" class="tab">
+    <div class="panel">
+      <h2 class="panel__title">Параметры расчётного периода</h2>
+      <div class="period">
+        <label>Месяц
+          <input type="month" id="period-month">
+        </label>
+        <label>Рабочих дней в месяце
+          <input type="number" id="period-days" min="1" max="31" value="22">
+        </label>
+        <button class="btn btn--primary" id="calc-btn">Рассчитать зарплату</button>
+        <button class="btn btn--success" id="save-btn" disabled>Сохранить ведомость</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2 class="panel__title">Табель и начисления</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Сотрудник</th>
+              <th>Отработано<br>(дней / часов)</th>
+              <th>Премия, ₽</th>
+              <th>Аванс, ₽</th>
+              <th>Прочие удержания, ₽</th>
+              <th>Начислено, ₽</th>
+              <th>Налог, ₽</th>
+              <th>К выдаче, ₽</th>
+              <th class="th-actions">Листок</th>
+            </tr>
+          </thead>
+          <tbody id="payroll-tbody"></tbody>
+          <tfoot id="payroll-tfoot"></tfoot>
+        </table>
+      </div>
+      <p class="empty" id="payroll-empty">Добавьте сотрудников на вкладке «Сотрудники».</p>
+    </div>
+
+    <!-- Расчётный листок -->
+    <div class="panel" id="payslip-panel" hidden>
+      <div class="payslip">
+        <div class="payslip__head">
+          <h2>Расчётный листок</h2>
+          <p id="payslip-meta"></p>
+        </div>
+        <div class="payslip__body" id="payslip-body"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ВЕДОМОСТИ ============ -->
+  <section id="tab-statements" class="tab">
+    <div class="panel">
+      <h2 class="panel__title">Зарплатные ведомости</h2>
+      <div id="statements-list"></div>
+      <p class="empty" id="statements-empty">Сохранённых ведомостей нет. Рассчитайте зарплату и нажмите «Сохранить ведомость».</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>Payroll © 2026 · Начислено = оклад (пропорционально отработанным дням) или часовая ставка × часы + премия. Удержания = НДФЛ + аванс + прочие.</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
